@@ -1,0 +1,110 @@
+import React, { useContext, useState } from 'react'
+import './Navbar.css'
+import { assets } from '../../assets /assets'
+import { Link } from 'react-router-dom'
+import { StoreContext } from '../../context/StoreContext'
+
+const Navbar = ({setShowLogin, showSearch}) => {
+
+const [menu,setMenu] = useState("menu")
+const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+const [searchOpen, setSearchOpen] = useState(false)
+
+const { getTotalCartAmount, searchQuery, setSearchQuery, food_list } = useContext(StoreContext)
+
+const highlightText = (text, query) => {
+    if (!query) return text;
+    const regex = new RegExp(`(${query})`, 'gi');
+    const parts = text.split(regex);
+    return parts.map((part, index) => 
+        regex.test(part) ? <strong key={index}>{part}</strong> : part
+    );
+};
+
+// Filter food based on search query (case-insensitive)
+const filteredFood = searchQuery ? food_list.filter(item =>
+    item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    item.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    item.category.toLowerCase().includes(searchQuery.toLowerCase())
+) : [];
+
+  return (
+    <div className='navbar'>
+        <Link to='/'><img src={assets.logo} alt="" className='logo'/></Link>
+        <ul className="navbar-menu">
+            <Link to="/" onClick={()=>setMenu("home")} className={menu==="home"?"active":""}>Home</Link>
+            <a href='#explore-menu' onClick={()=>setMenu("menu")} className={menu==="menu"?"active":""}>Menu</a>
+            <a href='#app-download' onClick={()=>setMenu("Mobile App")} className={menu==="Mobile App"?"active":""}>Mobile App</a>
+            <a href='#footer' onClick={()=>setMenu("Contact Us")} className={menu==="Contact Us"?"active":""}>Contact Us</a>
+        </ul>
+        
+        {/* Mobile Menu - 3 Dots */}
+        <div className="navbar-mobile-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+            <div className={`dot-menu ${mobileMenuOpen ? 'open' : ''}`}>
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+
+        <div className="navbar-right">
+            {showSearch && (
+            <div className="search-container">
+                <img src={assets.search_icon} alt="" className="search-icon" onClick={() => setSearchOpen(!searchOpen)} />
+                
+                {searchOpen && (
+                    <div className="search-dropdown">
+                        <input 
+                            type="text" 
+                            placeholder="Search foods..." 
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            autoFocus
+                        />
+                        {searchQuery && (
+                            <div className="search-results">
+                                {filteredFood.length > 0 ? (
+                                    filteredFood.map(item => (
+                                        <div 
+                                            key={item.id} 
+                                            className="search-result-item"
+                                            onClick={() => { setSearchOpen(false); }}
+                                        >
+                                            <img src={item.image} alt={item.name} />
+                                            <div className="search-result-info">
+                                                <span>{highlightText(item.name, searchQuery)}</span>
+                                                <small className="search-category">{highlightText(item.category, searchQuery)}</small>
+                                                <small className="search-description">{highlightText(item.description, searchQuery)}</small>
+                                            </div>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="no-results">No food found</div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>
+            )}
+            <div className="navbar-search-icon">
+               <Link to='/cart'><img src={assets.basket_icon} alt="" /></Link> 
+                <div className={getTotalCartAmount()===0?'':"dot"}>
+
+                </div>
+            </div>
+            <button onClick={()=>setShowLogin(true)}>sign in</button>
+        </div>
+
+        {/* Mobile Dropdown Menu */}
+        <div className={`navbar-mobile-menu ${mobileMenuOpen ? 'active' : ''}`}>
+            <Link to="/" onClick={()=>{setMenu("home"); setMobileMenuOpen(false)}} className={menu==="home"?"active":""}>Home</Link>
+            <a href='#explore-menu' onClick={()=>{setMenu("menu"); setMobileMenuOpen(false)}} className={menu==="menu"?"active":""}>Menu</a>
+            <a href='#app-download' onClick={()=>{setMenu("Mobile App"); setMobileMenuOpen(false)}} className={menu==="Mobile App"?"active":""}>Mobile App</a>
+            <a href='#footer' onClick={()=>{setMenu("Contact Us"); setMobileMenuOpen(false)}} className={menu==="Contact Us"?"active":""}>Contact Us</a>
+        </div>
+    </div>
+  )
+}
+
+export default Navbar
