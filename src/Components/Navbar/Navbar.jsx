@@ -6,7 +6,7 @@ import { StoreContext } from '../../context/StoreContext'
 
 const Navbar = ({setShowLogin, showSearch}) => {
 
-const [menu,setMenu] = useState("home")
+const [menu,setMenu] = useState("menu")
 const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 const [searchOpen, setSearchOpen] = useState(false)
 
